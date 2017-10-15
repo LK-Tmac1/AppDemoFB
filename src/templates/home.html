@@ -1,0 +1,106 @@
+{% extends "sidebar.html" %}
+{% block home %}
+
+<div class="content-container wrap">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xs-12">
+                    <span class="page-title red"><h2>Dashboard for {{ page_name }}</h2></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+
+                    <ol class="breadcrumb">
+                        <li><a href="#">Home</a>
+                        </li>
+                        <li class="active"></a>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <a href="list_posts?published_status=published">
+                        <div class="banner-block green">
+                            <div class="block-content">
+                                <span class="banner-icon fa-stack fa-3x">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-inbox fa-stack-1x fa-inverse"></i>
+                                </span>
+                                <div class="banner-content">
+                                    <div class="title"> {{ published_count }} </div>
+                                    <div class="sub-title">Published Posts</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <a href="list_posts?published_status=unpublished">
+                        <div class="banner-block yellow">
+                            <div class="block-content">
+                                <span class="fa-stack fa-3x">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-comments fa-stack-1x fa-inverse"></i>
+                            </span>
+                                <div class="banner-content">
+                                    <div class="title"> {{ unpublished_count }} </div>
+                                    <div class="sub-title">Unpublished Posts</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <a href="list_posts?published_status=scheduled">
+                        <div class="banner-block blue">
+                            <div class="block-content">
+                                <span class="fa-stack fa-3x">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-tags fa-stack-1x fa-inverse"></i>
+                            </span>
+                                <div class="banner-content">
+                                    <div class="title">{{ scheduled_count }}</div>
+                                    <div class="sub-title">Scheduled Posts</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <a href="list_posts">
+                        <div class="banner-block red">
+                            <div class="block-content">
+                                <span class="banner-icon fa-stack fa-3x">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-inbox fa-stack-1x fa-inverse"></i>
+                                </span>
+                                <div class="banner-content">
+                                    <div class="title"> {{ published_count + unpublished_count + scheduled_count }} </div>
+                                    <div class="sub-title">Total Posts</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+
+</body>
+</html>
+
+{% endblock %}

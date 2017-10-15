@@ -1,0 +1,67 @@
+=== Query
+  curl -i -X GET \
+   "https://graph.facebook.com/v2.10/me/promotable_posts?fields=is_published%2Cmessage%2Cscheduled_publish_time&access_token=<access token sanitized>"
+=== Access Token Info
+  {
+    "perms": [
+      "manage_pages",
+      "pages_show_list",
+      "publish_pages",
+      "public_profile"
+    ],
+    "page_id": 130309607624409,
+    "user_id": 707436732784027,
+    "app_id": 145634995501895
+  }
+=== Parameters
+- Query Parameters
+
+  {
+    "fields": "is_published,message,scheduled_publish_time"
+  }
+- POST Parameters
+
+  {}
+=== Response
+  {
+    "data": [
+      {
+        "is_published": false,
+        "message": "This+is+a+unpublished+post",
+        "id": "130309607624409_131051864216850"
+      },
+      {
+        "is_published": true,
+        "message": "Rasenzan is just like Rasengan in Naruto. What is your favorite hunting art? https://youtu.be/jhJVv8Cm0Yc",
+        "id": "130309607624409_130921310896572"
+      },
+      {
+        "is_published": true,
+        "message": "Wondering how to transfer your MHGen data to Japanese MHXX switch? Here is a post that can help you!\n\nhttps://www.reddit.com/r/MonsterHunter/comments/5zypzy/mhgen_mhx_mhxx_save_question/",
+        "id": "130309607624409_130315410957162"
+      },
+      {
+        "is_published": true,
+        "message": "Best Striker Dual Blades v.s. Glavenus, this player is awesome!\nhttps://youtu.be/dYwIkHuAIAc",
+        "id": "130309607624409_130313447624025"
+      },
+      {
+        "is_published": false,
+        "message": "This is a scheduled post.",
+        "scheduled_publish_time": 1512196140,
+        "id": "130309607624409_130313907623979"
+      },
+      {
+        "is_published": true,
+        "id": "130309607624409_130312984290738"
+      },
+      {
+        "is_published": true,
+        "id": "130309607624409_130312020957501"
+      }
+    ],
+    "paging": "--sanitized--",
+    "__debug__": {}
+  }
+=== Debug Information from Graph API Explorer
+- https://developers.facebook.com/tools/explorer/145634995501895/?method=GET&path=me%2Fpromotable_posts%3Ffields%3Dis_published%2Cmessage%2Cscheduled_publish_time&version=v2.10

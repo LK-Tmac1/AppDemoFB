@@ -1,0 +1,36 @@
+=== Query
+  curl -i -X POST \
+   -d "message=A%20post%20created%20by%20API%20scheduled%20at%201507755255" \
+   -d "published=false" \
+   -d "scheduled_publish_time=1507755255" \
+   -d "access_token=<access token sanitized>" \
+   "https://graph.facebook.com/v2.10/me/feed"
+=== Access Token Info
+  {
+    "perms": [
+      "manage_pages",
+      "pages_show_list",
+      "public_profile"
+    ],
+    "page_id": 130309607624409,
+    "user_id": 707436732784027,
+    "app_id": 145634995501895
+  }
+=== Parameters
+- Query Parameters
+
+  {}
+- POST Parameters
+
+  {
+    "message": "A post created by API scheduled at 1507755255",
+    "published": "false",
+    "scheduled_publish_time": "1507755255"
+  }
+=== Response
+  {
+    "id": "130309607624409_131054197549950",
+    "__debug__": {}
+  }
+=== Debug Information from Graph API Explorer
+- https://developers.facebook.com/tools/explorer/145634995501895/?method=POST&path=me%2Ffeed&version=v2.10&message=A%20post%20created%20by%20API%20scheduled%20at%201507755255&published=false&scheduled_publish_time=1507755255

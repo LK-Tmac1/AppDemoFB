@@ -1,0 +1,97 @@
+{% extends "header.html" %}
+{% block sidebar %}
+
+
+<body class="flat-blue sidebar-collapse">
+    <div class="sidebar">
+        <div class="menu-control toggle-sidebar">
+            <a class="navbar-brand" href="#"><i class="fa fa-bar-chart"></i> </a>
+            <i class="fa fa-bars navicon"></i>
+        </div>
+        <ul class="menu">
+            <li class="submenu">
+                <a href="home" class="active">
+                    <div>
+                        <i class="menu-icon fa fa-th-large"></i>
+                        <span class="menu-title">Dashboard</span>
+                    </div>
+                </a>
+            </li>
+            <li class="submenu">
+                <a href="element.html">
+                    <div>
+                        <i class="menu-icon fa fa-desktop"></i>
+                        <span class="menu-title">UI Elements</span>
+                    </div>
+                </a>
+            </li>
+            <li class="submenu">
+                <a href="list_posts">
+                    <div>
+                        <i class="menu-icon fa fa-table"></i>
+                        <span class="menu-title">List Posts</span>
+                    </div>
+                </a>
+            </li>
+            <li class="submenu">
+                <a href="new_post">
+                    <div>
+                        <i class="menu-icon fa fa-file-text-o"></i>
+                        <span class="menu-title">New Post</span>
+                    </div>
+                </a>
+            </li>
+
+            <li class="submenu dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+
+                    <div>
+                        <i class="menu-icon fa fa-slack"></i>
+                        <span class="menu-title">Page Example</span>
+                    </div>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="login.html">
+                            <div>
+                                <i class="menu-icon fa fa-sign-in"></i>
+                                <span class="menu-sub-title">Login</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="register.html">
+                            <div>
+                                <i class="menu-icon fa fa-pencil-square-o"></i>
+                                <span class="menu-sub-title">Register</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="submenu dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+
+                    <div>
+                        <i class="menu-icon fa fa-magic"></i>
+                        <span class="menu-title">Custom Elements</span>
+                    </div>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="custom-dashboard.html">
+                            <div>
+                                <i class="menu-icon fa fa-bar-chart"></i>
+                                <span class="menu-sub-title">Dashboard</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+{% endblock %} {% block home %}
+{% endblock %} {% block list_posts %}
+{% endblock %} {% block new_post %}
+{% endblock %}
