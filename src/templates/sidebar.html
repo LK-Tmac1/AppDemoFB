@@ -2,6 +2,7 @@
 {% block sidebar %}
 
 
+
 <body class="flat-blue sidebar-collapse">
     <div class="sidebar">
         <div class="menu-control toggle-sidebar">
@@ -12,27 +13,20 @@
             <li class="submenu">
                 <a href="home" class="active">
                     <div>
-                        <i class="menu-icon fa fa-th-large"></i>
+                        <i class="menu-icon fa fa-bar-chart"></i>
                         <span class="menu-title">Dashboard</span>
                     </div>
                 </a>
             </li>
             <li class="submenu">
-                <a href="element.html">
+                <a href="login">
                     <div>
                         <i class="menu-icon fa fa-desktop"></i>
-                        <span class="menu-title">UI Elements</span>
+                        <span class="menu-title">Login</span>
                     </div>
                 </a>
             </li>
-            <li class="submenu">
-                <a href="list_posts">
-                    <div>
-                        <i class="menu-icon fa fa-table"></i>
-                        <span class="menu-title">List Posts</span>
-                    </div>
-                </a>
-            </li>
+
             <li class="submenu">
                 <a href="new_post">
                     <div>
@@ -43,27 +37,35 @@
             </li>
 
             <li class="submenu dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <a href="list_posts" class="dropdown-toggle" data-toggle="dropdown">
 
                     <div>
-                        <i class="menu-icon fa fa-slack"></i>
-                        <span class="menu-title">Page Example</span>
+                        <i class="menu-icon fa fa-table"></i>
+                        <span class="menu-title">List Posts</span>
                     </div>
                 </a>
                 <ul class="dropdown-menu">
                     <li>
-                        <a href="login.html">
+                        <a href="list_posts?published_status=published">
                             <div>
                                 <i class="menu-icon fa fa-sign-in"></i>
-                                <span class="menu-sub-title">Login</span>
+                                <span class="menu-sub-title">Published</span>
                             </div>
                         </a>
                     </li>
                     <li>
-                        <a href="register.html">
+                        <a href="list_posts?published_status=unpublished">
                             <div>
                                 <i class="menu-icon fa fa-pencil-square-o"></i>
-                                <span class="menu-sub-title">Register</span>
+                                <span class="menu-sub-title">Unpublished</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="list_posts?published_status=scheduled">
+                            <div>
+                                <i class="menu-icon fa fa-pencil-square"></i>
+                                <span class="menu-sub-title">Scheduled</span>
                             </div>
                         </a>
                     </li>
@@ -91,7 +93,9 @@
         </ul>
     </div>
 
+
 {% endblock %} {% block home %}
 {% endblock %} {% block list_posts %}
 {% endblock %} {% block new_post %}
+{% endblock %} {% block edit_post %}
 {% endblock %}

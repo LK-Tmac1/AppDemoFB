@@ -39,8 +39,8 @@ class Post(object):
                 return "Published"
             elif post_published is False:
                 if scheduled_publish_time:
-                    return "S: %s" % unix_to_real_time(int(scheduled_publish_time))
-            return "Not published/scheduled"
+                    return "Scheduled on %s" % unix_to_real_time(int(scheduled_publish_time))
+            return "Unpublished"
 
         post_list = list([])
         if json_data:
@@ -66,6 +66,6 @@ class Post(object):
         return post_list
 
     def __repr__(self):
-        return "%s, %s, %s, %s, %s" % (self.promotion_status, self.page_post_id, self.created_time, self.publish_status, self.scheduled_publish_time)
+        return "%s, %s, %s, %s" % (self.promotion_status, self.page_post_id, self.created_time, self.publish_status)
 
 
