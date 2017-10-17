@@ -31,8 +31,8 @@
                                     {% if post.publish_status.lower() != 'published' %}
 
                                     <select name='published_status' style="margin-right: 12px">
-                                        <option value='published'>Publish it right now</option>
                                         <option value='unpublished'>Don't publish it</option>
+                                        <option value='published'>Publish it right now</option>
                                         <option value='scheduled'>Schedule the publish</option>
                                     </select>
 
@@ -42,7 +42,8 @@
 
                                 {% endblock check_published %}
 
-                                <button type="submit" value='submit' class="btn">Submit</button>
+                                <button type="submit" name='edit' value='submit'>Submit</button>
+                                <button type="submit" name='delete' value='{{post.page_post_id}}'>Delete</button>
                             </div>
                         </form>
                     </div>

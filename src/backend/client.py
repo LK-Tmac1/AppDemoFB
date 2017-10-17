@@ -62,9 +62,3 @@ class PageClient(object):
 
     def delete_post(self, post_id):
         self.api.delete_object(post_id)
-
-
-# client = PageClient("EAACEdEose0cBAGFZBpzULFHJQIFaJKHpyLgcNMPR0g5eTh1ugo5jpgQXCcTZCZASG5UrBIUm8zrh45cTmC614ig2397VWuOQhhf5BYojzvRKNpviK3pvUuMTWEBitkVEjZB0J7WzhkIgAZAVZADNzqKNtCuZCXMIKjmUB7sPeoeykSKfQjYjrh8M6hN3ZBkNgNIV4BE2kAfiIQZDZD")
-# print client.create_post("Sample post 2", "scheduled", 1514156400)
-# client.delete_post("130309607624409_131965767458793")
-

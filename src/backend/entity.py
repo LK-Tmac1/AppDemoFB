@@ -16,7 +16,12 @@ class Post(object):
         self.created_time = parse_str_date(created_time)
         self.message = message
         self.promotion_status = self.updated_time = self.publish_status = ""
-        self.num_of_view = random.randint(3, 40)
+        self.num_of_view = ""
+
+    def change_publish_status(self, publish_status):
+        self.publish_status = publish_status
+        if self.publish_status.lower() == "published":
+            self.num_of_view = random.randint(3, 40)
 
     @staticmethod
     def split_unpublished_posts(unpublished_posts):
@@ -28,7 +33,6 @@ class Post(object):
             else:
                 unscheduled.append(post)
         return scheduled, unscheduled
-
 
     @staticmethod
     def parse_post_from_json(json_data, is_published):
@@ -55,17 +59,16 @@ class Post(object):
                         # list both published and unpublished/scheduled posts
                         if "is_published" in post_obj:
                             if str(post_obj["is_published"]).lower() == "true":
-                                post.publish_status = "Published"
+                                publish_status = "Published"
                             else:
-                                post.publish_status = parse_published_status(False, post_obj.get('scheduled_publish_time'))
+                                publish_status = parse_published_status(False, post_obj.get('scheduled_publish_time'))
                         else:
-                            post.publish_status = "Unknown"
+                            publish_status = "Unknown"
                     else:
-                        post.publish_status = parse_published_status(is_published, post_obj.get('scheduled_publish_time'))
+                        publish_status = parse_published_status(is_published, post_obj.get('scheduled_publish_time'))
+                    post.change_publish_status(publish_status)
                     post_list.append(post)
         return post_list
 
     def __repr__(self):
         return "%s, %s, %s, %s" % (self.promotion_status, self.page_post_id, self.created_time, self.publish_status)
-
-

@@ -127,19 +127,25 @@
                             <table id="example" class="table table-striped" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
+                                        {% block check_publish_status_one %}
+                                        {% if show_stat %}
                                         <th>Views</th>
+                                        {% endif %}
+                                        {% endblock check_publish_status_one %}
                                         <th>Created time</th>
                                         <th>Published Status</th>
                                         <th>Promotion</th>
                                         <th>Message</th>
                                         <th></th>
-                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                {% block check_publish_status_two %}
                                 {% for post in post_list %}
                                     <tr>
+                                        {% if show_stat %}
                                         <td>{{ post.num_of_view }}</td>
+                                        {% endif %}
                                         <td>{{ post.created_time }}</td>
                                         <td>{{ post.publish_status }}</td>
                                         <td>{{ post.promotion_status }}</td>
@@ -151,13 +157,9 @@
                                                 <button type="submit" name="edit" value='{{post.page_post_id}}'>Edit</button>
                                             </form>
                                         </td>
-                                        <td>
-                                            <form name="f1" method="post">
-                                                <button type="submit" name="delete" value='{{post.page_post_id}}'>Delete</button>
-                                            </form>
-                                        </td>
                                     </tr>
                                 {% endfor %}
+                                {% endblock check_publish_status_two %}
                                 </tbody>
                             </table>
                         </div>
@@ -170,7 +172,7 @@
     <script type="text/javascript">
     $(function() {
         $('#example').DataTable({
-             "order": [[ , "desc" ]]
+             "order": [[ 1, "desc" ]]
         });
     });
     </script>
