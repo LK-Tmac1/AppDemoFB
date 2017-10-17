@@ -127,40 +127,46 @@
                             <table id="example" class="table table-striped" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>Published Status</th>
                                         <th>Created time</th>
-                                        {% block check_publish_status_one %}
-                                        {% if show_stat %}
-                                        <th>Views</th>
-                                        <th>Promotion</th>
-                                        {% endif %}
-                                        {% endblock check_publish_status_one %}
+                                        {% block check_published_status_one %}
+                                            {% if published_status == 'published' %}
+                                                <th>Views</th>
+                                                <th>Promotion</th>
+                                            {% elif published_status == 'scheduled' %}
+                                                <th>Scheduled time</th>
+                                            {% endif %}
+                                        {% endblock check_published_status_one %}
                                         <th>Message</th>
                                         <th></th>
                                     </tr>
                                 </thead>
+
+
                                 <tbody>
-                                {% block check_publish_status_two %}
+                                {% block check_published_status_two %}
                                 {% for post in post_list %}
                                     <tr>
-                                        <td>{{ post.publish_status }}</td>
                                         <td>{{ post.created_time }}</td>
-                                        {% if show_stat %}
-                                        <td>{{ post.num_of_view }}</td>
-                                        <td>{{ post.promotion_status }}</td>
+                                        {% if published_status == 'published' %}
+                                            <td>{{ post.num_of_view }}</td>
+                                            <td>{{ post.promotion_status }}</td>
+                                        {% elif published_status == 'scheduled' %}
+                                            <td>{{ post.scheduled_time }}</td>
                                         {% endif %}
+
                                         {% autoescape false %}
                                         <td>{{ post.message }}</td>
                                         {% endautoescape %}
                                         <td>
                                             <form name="f1" method='post'>
-                                                <button type="submit" name="edit" value='{{post.page_post_id}}'>Edit</button>
+                                                <input type="hidden" name="published_status" value="{{published_status}}">
+                                                <button type="submit" name="view" value='{{post.page_post_id}}'>View</button>
                                             </form>
                                         </td>
                                     </tr>
                                 {% endfor %}
-                                {% endblock check_publish_status_two %}
                                 </tbody>
+                                {% endblock check_published_status_two %}
                             </table>
                         </div>
                     </div>

@@ -1,17 +1,17 @@
 {% extends "sidebar.html" %}
-{% block edit_post %}
+{% block view_post %}
 
     <div class="content-container">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-xs-12">
-                    <span class="page-title red"><h3>Edit Post</h3></span>
+                    <span class="page-title red"><h3>View Post</h3></span>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-xs-12">
-                    <span class="page-title"><h4>What do you want to change this post that <b><i>{{post.publish_status.lower()}}</i></b>?</h4></span>
+                    <span class="page-title"><h4>What do you want to change this post that <b><i>{{view_message}}</i></b>?</h4></span>
                 </div>
             </div>
 
@@ -23,12 +23,12 @@
                             <div class="block-content">
                                 <div class="form-group">
                                     <input type="hidden" name="post_id" value="{{ post.page_post_id }}">
-                                    <textarea name="message", class="form-control" rows="10">{{post.message}}</textarea>
+                                    <textarea name="message" class="form-control" rows="10">{{post.message}}</textarea>
                                 </div>
 
                                 {% block check_published %}
 
-                                    {% if post.publish_status.lower() != 'published' %}
+                                    {% if published_status != 'published' %}
 
                                     <select name='published_status' style="margin-right: 12px">
                                         <option value='unpublished'>Don't publish it</option>

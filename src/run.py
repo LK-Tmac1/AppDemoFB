@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from backend.client import PageClient
-from backend.entity import Post
+from backend.entity import PostPublished, PostUnpublished, PostScheduled
 from backend.utility import get_min_schedule_date, unix_to_real_time
 import time, facebook
 
@@ -40,11 +40,11 @@ def home_dashboard():
     try:
         published_posts = page_client.list_published_posts()
         unpublished_posts = page_client.list_unpublished_posts()
-        scheduled, unscheduled = Post.split_unpublished_posts(unpublished_posts)
+        scheduled_posts = page_client.list_scheduled_posts()
         return render_template("home.html",
                                published_count=len(published_posts),
                                unpublished_count=len(unpublished_posts),
-                               scheduled_count=len(scheduled),
+                               scheduled_count=len(scheduled_posts),
                                page_name=page_client.page.page_name)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
@@ -53,58 +53,63 @@ def home_dashboard():
 @app.route('/list_posts', methods=['GET'])
 def list_posts():
     try:
-        published_status = str(request.args.get("published_status", "all")).lower()
+        published_status = str(request.args.get("published_status", "published")).lower()
         post_list = page_client.get_posts_by_published_status(published_status)
         follow_message = request.args.get("follow_message")
-        show_stat = published_status == "all" or published_status == "published"
         if not follow_message:
             follow_message = "%s posts for page %s" % (published_status.title(), page_client.page.page_name)
         return render_template("list_posts.html", post_list=post_list,
-                               follow_message=follow_message, show_stat=show_stat)
+                               follow_message=follow_message, published_status=published_status)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
 
 @app.route('/list_posts', methods=['POST'])
-def update_post():
+def view_post():
     try:
-        post_id = request.form.get("edit")
-        return redirect(url_for('get_post_to_edit', post_id=post_id))
+        post_id = request.form.get("view")
+        published_status = request.args.get("published_status")
+        return redirect(url_for('view_post_details', post_id=post_id, published_status=published_status))
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
 
-@app.route('/edit_post', methods=['GET'])
-def get_post_to_edit():
+@app.route('/view_post', methods=['GET'])
+def view_post_details():
     try:
-        post = page_client.get_target_post(request.args.get("post_id"))
+        post_id = request.args.get("post_id")
+        published_status = request.args.get("published_status", "unpublished")
+        post = page_client.get_target_post(post_id, published_status)
         if post:
-            return render_template("edit_post.html", post=post)
+            view_message = "not published yet"
+            if published_status == "published":
+                view_message = "already published"
+            elif published_status == "scheduled":
+                view_message = "scheduled to publish on %s" % post.scheduled_time
+            return render_template("view_post.html", post=post,
+                                   published_status=published_status, view_message=view_message)
         else:
             return handle_error(error_message="This post does not exist!")
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
 
-@app.route('/edit_post', methods=['POST'])
-def submit_update_post():
+@app.route('/view_post', methods=['POST'])
+def update_post():
     try:
         if 'edit' in request.form:
             # If the post is already published, cannot change it to unpublished or scheduled anymore.
-            published_status = "published"
+            published_status = request.form.get("published_status", "published")
             if "post_id" not in request.form:
                 raise facebook.GraphAPIError("Not valid post ID to be updated.")
             parameters = dict(message=request.form.get("message"), post_id=request.form.get("post_id"),
                             published_status="published")
             if "published_status" in request.form:
-                parameters["published_status"] = published_status = request.form.get("published_status")
+                parameters["published_status"] = request.form.get("published_status")
                 if published_status == "scheduled" and "scheduled_time" in request.form:
                     parameters["scheduled_time"] = request.form.get("scheduled_time", 0)
             response = page_client.create_post(**parameters)
             if 'success' in response:
-                display_post_content = str(parameters["message"])
-                if len(display_post_content) >= 20:
-                    display_post_content = display_post_content[:20] + "...(ignored)"
                 follow_message = "Successfully updated the post."
                 return redirect(url_for('list_posts', published_status=published_status, follow_message=follow_message))
             else:
@@ -123,7 +128,7 @@ def draft_post():
 
 
 @app.route('/new_post', methods=["POST"])
-def submit_new_post():
+def create_new_post():
     # create a new post based on the published status and scheduled time
     # if successfully created, go to the corresponding list_posts page
     parameters = dict(message=request.form.get("message"))
