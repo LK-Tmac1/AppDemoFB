@@ -31,13 +31,10 @@
                             Log In...
                           </div>
                         </div>
-                    <div class="alert alert-success hidden" id="login-message" role="alert">
-                                        <i class="fa fa-check"></i> Login Success. Please wait for loading.
-                                    </div>
                 <div class="box">
                     <form id="login-form" method="post">
                         <div class="control">
-                            <div class="label">Please input your page access token</div>
+                            <div class="label">{{ login_message }}</div>
                             <input type="text" name="access_token" class="form-control" value="" />
                         </div>
 
