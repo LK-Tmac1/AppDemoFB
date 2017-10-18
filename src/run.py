@@ -54,9 +54,6 @@ def list_posts():
     try:
         published_status = str(request.args.get("published_status", "published")).lower()
         post_list = page_client.list_post(published_status)
-        if published_status == "published":
-            for post in post_list:
-                page_client.get_post_impressions(post)
         follow_message = request.args.get("follow_message")
         if not follow_message:
             follow_message = "%s posts for page %s" % (published_status.title(), page_client.page.page_name)

@@ -128,16 +128,17 @@
                             <table id="example" class="table table-striped" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>Created time</th>
                                         {% block check_published_status_one %}
                                             {% if published_status == 'published' %}
-                                                <th>Views</th>
+                                                <th></th>
                                                 <th>Promotion</th>
                                             {% elif published_status == 'scheduled' %}
                                                 <th>Scheduled time</th>
                                             {% endif %}
                                         {% endblock check_published_status_one %}
                                         <th>Message</th>
+                                        <th>Created time</th>
+                                        <th>Admin Creator</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -147,17 +148,19 @@
                                 {% block check_published_status_two %}
                                 {% for post in post_list %}
                                     <tr>
-                                        <td>{{ post.created_time }}</td>
+
                                         {% if published_status == 'published' %}
-                                            <td>{{ post.num_of_view }}</td>
+                                            <td><input type="checkbox" name="check" value="{{post.page_post_id}}"><br>
+</td>
                                             <td>{{ post.promotion_status }}</td>
                                         {% elif published_status == 'scheduled' %}
                                             <td>{{ post.scheduled_time }}</td>
                                         {% endif %}
 
-                                        {% autoescape false %}
                                         <td>{{ post.message }}</td>
-                                        {% endautoescape %}
+                                        <td>{{ post.created_time }}</td>
+                                        <td>{{ post.admin_creator }}</td>
+
                                         <td>
                                             <form name="f1" method='post'>
                                                 <input type="hidden" name="published_status" value="{{published_status}}">
@@ -179,7 +182,7 @@
     <script type="text/javascript">
     $(function() {
         $('#example').DataTable({
-             "order": [[ 0, "asc" ], [ 1, "desc" ]]
+             "order": [[ 1, "asc" ], [ 2, "desc" ]]
         });
     });
     </script>
