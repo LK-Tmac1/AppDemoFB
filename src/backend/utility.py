@@ -36,11 +36,3 @@ def real_time_to_unix(date_time_str):
     date_time_str = date_time_str.replace("T", " ")
     return int(datetime.strptime(date_time_str, '%Y-%m-%d %H:%M').strftime("%s"))
 
-
-#print real_time_to_unix("2017-10-21T00:00")
-
-# print parse_str_date("2017-10-14T05:36:33+0000")
-
-# print unix_to_real_time(1512196140)
-
-#print get_min_schedule_date()

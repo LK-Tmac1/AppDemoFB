@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
 from backend.client import PageClient
-from backend.entity import PostPublished, PostUnpublished, PostScheduled
 from backend.utility import get_min_schedule_date, unix_to_real_time
 import time, facebook
 
@@ -38,13 +37,13 @@ def auth():
 @app.route('/home')
 def home_dashboard():
     try:
-        published_posts = page_client.list_published_posts()
-        unpublished_posts = page_client.list_unpublished_posts()
-        scheduled_posts = page_client.list_scheduled_posts()
+        published_count = len(page_client.list_post("published"))
+        unpublished_count = len(page_client.list_post("unpublished"))
+        scheduled_count = len(page_client.list_post("scheduled"))
         return render_template("home.html",
-                               published_count=len(published_posts),
-                               unpublished_count=len(unpublished_posts),
-                               scheduled_count=len(scheduled_posts),
+                               published_count=published_count,
+                               unpublished_count=unpublished_count,
+                               scheduled_count=scheduled_count,
                                page_name=page_client.page.page_name)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
@@ -54,7 +53,10 @@ def home_dashboard():
 def list_posts():
     try:
         published_status = str(request.args.get("published_status", "published")).lower()
-        post_list = page_client.get_posts_by_published_status(published_status)
+        post_list = page_client.list_post(published_status)
+        if published_status == "published":
+            for post in post_list:
+                page_client.get_post_impressions(post)
         follow_message = request.args.get("follow_message")
         if not follow_message:
             follow_message = "%s posts for page %s" % (published_status.title(), page_client.page.page_name)
@@ -81,11 +83,11 @@ def view_post_details():
         published_status = request.args.get("published_status", "unpublished")
         post = page_client.get_target_post(post_id, published_status)
         if post:
-            view_message = "not published yet"
+            view_message = "not published/scheduled yet"
             if published_status == "published":
                 view_message = "already published"
             elif published_status == "scheduled":
-                view_message = "scheduled to publish on %s" % post.scheduled_time
+                view_message = "scheduled on %s" % post.scheduled_time
             return render_template("view_post.html", post=post,
                                    published_status=published_status, view_message=view_message)
         else:
@@ -97,9 +99,9 @@ def view_post_details():
 @app.route('/view_post', methods=['POST'])
 def update_post():
     try:
+        published_status = request.form.get("published_status", "published")
         if 'edit' in request.form:
             # If the post is already published, cannot change it to unpublished or scheduled anymore.
-            published_status = request.form.get("published_status", "published")
             if "post_id" not in request.form:
                 raise facebook.GraphAPIError("Not valid post ID to be updated.")
             parameters = dict(message=request.form.get("message"), post_id=request.form.get("post_id"),
@@ -113,11 +115,14 @@ def update_post():
                 follow_message = "Successfully updated the post."
                 return redirect(url_for('list_posts', published_status=published_status, follow_message=follow_message))
             else:
-                return redirect(url_for("failure", error_message=response))
+                return handle_error(error_message=response)
         elif 'delete' in request.form:
-            page_client.delete_post(request.form.get("post_id"))
-            follow_message = "Successfully deleted the post"
-            return redirect(url_for('list_posts', follow_message=follow_message))
+            post_id = request.form.get("post_id")
+            if page_client.delete_post(post_id):
+                follow_message = "Successfully deleted the post"
+                return redirect(url_for('list_posts', follow_message=follow_message, published_status=published_status))
+            else:
+                return handle_error(error_message="Failed to delete post %s " % post_id)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
@@ -138,7 +143,7 @@ def create_new_post():
         parameters["scheduled_time"] = request.form.get("scheduled_time")
     try:
         response = page_client.create_post(**parameters)
-        if 'id' in response and 'error' not in response:
+        if response is True:
             follow_message = "Successfully created a %s post on %s" % (published_status, unix_to_real_time(int(time.time())))
             return redirect(url_for('list_posts', published_status=published_status, follow_message=follow_message))
         else:
@@ -148,4 +153,4 @@ def create_new_post():
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000, debug=True)
+    app.run(host='localhost', port=4000, debug=True)
