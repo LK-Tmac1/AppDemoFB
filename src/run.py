@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from backend.client import PagePostClient
-from backend.utility import get_min_schedule_date, unix_to_real_time
+from backend.utility import get_min_schedule_date, unix_to_real_time, Email, get_current_datetime
 from backend.entity import PostPublished
+from backend.config import email_api_key
 import time, facebook, os
 
 app = Flask(__name__)
@@ -147,8 +148,7 @@ def create_new_post():
         if response is True:
             follow_message = "Successfully created a %s post on %s" % (published_status, unix_to_real_time(int(time.time())))
             return redirect(url_for('list_posts', published_status=published_status, follow_message=follow_message))
-        else:
-            return handle_error(error_message=response)
+        return handle_error(error_message=response)
     except facebook.GraphAPIError as e:
         return handle_error(error_message=e.message)
 
@@ -157,7 +157,8 @@ def create_new_post():
 def get_post_insights():
     try:
         post_list = page_client.get_post_insights_batch()
-        return render_template("post_insights.html", post_list=post_list)
+        follow_message = request.args.get("follow_message", "")
+        return render_template("post_insights.html", post_list=post_list, follow_message=follow_message)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
@@ -168,15 +169,24 @@ def export_insights_csv():
         if "view" in request.form:
             post_id = request.form.get("view")
             return redirect(url_for("view_post_details", post_id=post_id, published_status="published"))
-        elif "export_excel" in request.form:
+        elif "export_excel" or "send_email" in request.form:
             # convert post insights to csv objects
-            file_path = "%s/tmp/%s.xlsx" % (os.path.dirname(os.path.abspath(__file__)),
-                                            unix_to_real_time(int(time.time())))
+            file_name = "%s.xlsx" % get_current_datetime()
+            excel_file_path = "%s/tmp/%s" % (os.path.dirname(os.path.abspath(__file__)), file_name)
             post_list = page_client.list_post("published")
-            PostPublished.save_to_excel_file(file_path, post_list)
-            return send_file(file_path, as_attachment=True)
-        elif "send_email" in request.form:
-            pass
+            PostPublished.save_to_excel_file(excel_file_path, post_list)
+            if "send_email" in request.form and "email_address" in request.form:
+                email_address = request.form.get("email_address")
+                subject = "Post insights from Kun's demo, %s" % file_name
+                email = Email(email_api_key, email_to=email_address, subject=subject)
+                email.add_text("Please see attachment")
+                email.add_attachment(excel_file_path)
+                if email.send():
+                    follow_message = "Successfully sent email to %s" % email_address
+                    return redirect(url_for("get_post_insights", follow_message=follow_message))
+                return handle_error(error_message="Failed to send email to %s" % email_address)
+            else:
+                return send_file(excel_file_path, as_attachment=True)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
