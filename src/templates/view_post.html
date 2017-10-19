@@ -23,6 +23,7 @@
                         <form class="form-vertical" method='post'>
                             <div class="block-content">
                                 <div class="form-group">
+                                    <input type="hidden" name="current_status" value="{{ post.published_status }}">
                                     <input type="hidden" name="post_id" value="{{ post.page_post_id }}">
                                     <textarea name="message" class="form-control" rows="12">{{post.message}}</textarea>
                                 </div>
@@ -31,7 +32,7 @@
 
                                     {% if published_status != 'published' %}
 
-                                    <select name='published_status' style="margin-right: 12px">
+                                    <select name='updated_status' style="margin-right: 12px">
                                         <option value='unpublished'>Don't publish it</option>
                                         <option value='published'>Publish it right now</option>
                                         <option value='scheduled'>Schedule the publish</option>

@@ -102,28 +102,26 @@ def view_post_details():
 @app.route('/view_post', methods=['POST'])
 def update_post():
     try:
-        published_status = request.form.get("published_status", "published")
+        current_status = request.form.get("current_status")
         if 'edit' in request.form:
             # If the post is already published, cannot change it to unpublished or scheduled anymore.
             if "post_id" not in request.form:
                 raise facebook.GraphAPIError("Not valid post ID to be updated.")
-            parameters = dict(message=request.form.get("message"), post_id=request.form.get("post_id"),
-                            published_status="published")
-            if "published_status" in request.form:
-                parameters["published_status"] = request.form.get("published_status")
-                if published_status == "scheduled" and "scheduled_time" in request.form:
-                    parameters["scheduled_time"] = request.form.get("scheduled_time", 0)
-            response = page_client.create_post(**parameters)
+            response = page_client.update_post(message=request.form.get("message"),
+                                               post_id=request.form.get("post_id"),
+                                               current_status=current_status,
+                                               updated_status=request.form.get("updated_status"),
+                                               scheduled_time=request.form.get("scheduled_time"))
             if response is True:
                 follow_message = "Successfully updated the post."
-                return redirect(url_for('list_posts', published_status=published_status, follow_message=follow_message))
+                return redirect(url_for('list_posts', published_status=current_status, follow_message=follow_message))
             else:
                 return handle_error(error_message=response)
         elif 'delete' in request.form:
             post_id = request.form.get("post_id")
             if page_client.delete_post(post_id):
                 follow_message = "Successfully deleted the post"
-                return redirect(url_for('list_posts', follow_message=follow_message, published_status=published_status))
+                return redirect(url_for('list_posts', follow_message=follow_message, published_status=current_status))
             else:
                 return handle_error(error_message="Failed to delete post %s " % post_id)
     except facebook.GraphAPIError as e:
@@ -177,6 +175,8 @@ def export_insights_csv():
             post_list = page_client.list_post("published")
             PostPublished.save_to_excel_file(file_path, post_list)
             return send_file(file_path, as_attachment=True)
+        elif "send_email" in request.form:
+            pass
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 

@@ -37,11 +37,12 @@ class Post(object):
             base_field += ",scheduled_publish_time"
         return base_field
 
-    def __init__(self, page_post_id, created_time, message, admin_creator):
+    def __init__(self, page_post_id, created_time, message, admin_creator, publish_status):
         self.page_post_id = page_post_id
         self.created_time = parse_str_date(created_time)
         self.message = message
         self.admin_creator = admin_creator
+        self.published_status = publish_status
 
     @staticmethod
     def parse_post_from_json(json_data, publish_status):
@@ -76,7 +77,7 @@ class PostPublished(Post):
     excel_header_list = ["promotion_status", "created_time", "message", "admin_creator"] + insights_fields_list
 
     def __init__(self, page_post_id, created_time, message, promotion_status, admin_creator):
-        Post.__init__(self, page_post_id, created_time, message, admin_creator)
+        Post.__init__(self, page_post_id, created_time, message, admin_creator, "published")
         self.promotion_status = promotion_status
 
     def parse_post_insight_from_json(self, json_data):
@@ -114,10 +115,10 @@ class PostPublished(Post):
 
 class PostUnpublished(Post):
     def __init__(self, page_post_id, created_time, message, admin_creator):
-        Post.__init__(self, page_post_id, created_time, message, admin_creator)
+        Post.__init__(self, page_post_id, created_time, message, admin_creator, "unpublished")
 
 
 class PostScheduled(Post):
     def __init__(self, page_post_id, created_time, message, scheduled_time, admin_creator):
-        Post.__init__(self, page_post_id, created_time, message, admin_creator)
+        Post.__init__(self, page_post_id, created_time, message, admin_creator, "scheduled")
         self.scheduled_time = scheduled_time

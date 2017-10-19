@@ -55,37 +55,47 @@ class PagePostClient(object):
             cache.expire = False
         return cache.get_all_data()
 
-    def create_post(self, message, published_status, scheduled_time=None, post_id=None):
-        parameters = {"message": message}
-        if published_status == "published":
-            parameters["published"] = True
-        elif published_status == "scheduled":
+    def create_post(self, message, published_status, scheduled_time=None):
+        parameters = dict([])
+        parameters["message"] = message
+        parameters["published"] = published_status == "published"
+        if published_status == "scheduled" and scheduled_time is not None:
             scheduled_publish_time = real_time_to_unix(scheduled_time)
             if type(scheduled_publish_time) is int and scheduled_publish_time - int(time.time()) >= 60:
                 # need to ensure the scheduled_publish_time is a valid one: an int and at least 60 secs later
                 parameters["scheduled_publish_time"] = scheduled_publish_time
-        parent_object, connection_name = "me", "feed"
-        if post_id:
-            # if post id is provided, it is equivalent to update a given post
-            parent_object, connection_name = post_id, ''
-            if published_status == "published":
-                # if it has been already published, need to pop published and scheduled_publish_time from parameters
-                parameters.pop("published", None)
-                parameters.pop("scheduled_publish_time", None)
-        response = self.api.put_object(parent_object, connection_name, **parameters)
-        if post_id and 'success' in response:
-            # if the updating succeeds, set all caches as expired
-            self.cache_remove_all_batch()
-            self.cache_expire_batch()
-        elif not post_id and 'id' in response and 'error' not in response:
-            # if not update, i.e. creating a new one, just expire the corresponding cache
+        response = self.api.put_object("me", "feed", **parameters)
+        if 'id' in response and 'error' not in response:
+            # succeeds, expire the corresponding cache for creation
             cache = self.get_cache(published_status)
             cache.remove_all()
             cache.expire = True
-        else:
-            # otherwise, return the response failure obtained from API call
-            return response
-        return True
+            return True
+        # otherwise, return the response failure obtained from API call
+        return response
+
+    def update_post(self, post_id, message, current_status, updated_status, scheduled_time=None):
+        parameters = {"message": message}
+        if current_status != "published":
+            parameters["published"] = True if updated_status == "published" else False
+        if scheduled_time is not None and updated_status == "scheduled":
+            scheduled_publish_time = real_time_to_unix(scheduled_time)
+            if type(scheduled_publish_time) is int and scheduled_publish_time - int(time.time()) >= 60:
+                # need to ensure the scheduled_publish_time is a valid one: an int and at least 60 secs later
+                parameters["scheduled_publish_time"] = scheduled_publish_time
+        response = self.api.put_object(post_id, '', **parameters)
+        if 'success' in response:
+            # if the updating succeeds, update the current and target cache
+            cache_current = self.get_cache(current_status)
+            cache_current.remove_one(post_id)
+            if updated_status is None:
+                # if None it means the status cannot be updated so must be published already
+                updated_status = "published"
+            post = self.get_target_post(post_id, publish_status=updated_status)
+            cache_new = self.get_cache(updated_status)
+            cache_new.add_one(post_id, post)
+            return True
+        return response
 
     def update_token(self, access_token):
         self.api = facebook.GraphAPI(access_token)

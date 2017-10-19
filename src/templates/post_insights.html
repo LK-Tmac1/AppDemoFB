@@ -122,11 +122,13 @@
                         <div class="block-content">
                             <form name="f1" method='post'>
                                 <button type="submit" name="export_excel" value="export">Export As Excel</button>
+                                <button type="submit" name="send_email" value="export">Send Excel Email</button>
                             </form>
                             <br>
                             <table id="example" class="table table-striped" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
+                                        <th>Created time</th>
                                         <th>Promotion</th>
                                         <th>IFP</th>
                                         <th>IF</th>
@@ -145,6 +147,7 @@
                                 <tbody>
                                 {% for post in post_list %}
                                     <tr>
+                                        <td>{{ post.created_time }}</td>
                                         <td>{{post.promotion_status}}</td>
                                         <td>{{post.post_impressions_fan_paid}}</td>
                                         <td>{{post.post_impressions_fan}}</td>
@@ -176,7 +179,7 @@
     <script type="text/javascript">
     $(function() {
         $('#example').DataTable({
-             "order": [[ 1, "asc" ], [ 2, "desc" ]]
+             "order": [[ 0, "desc" ]]
         });
     });
     </script>

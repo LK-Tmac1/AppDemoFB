@@ -15,7 +15,7 @@ class CachedData(object):
         self.cached_data.clear()
 
     def remove_one(self, key):
-        self.cached_data.pop(key, None)
+        return self.cached_data.pop(key, None)
 
     def add_one(self, key, value):
         self.cached_data[key] = value
