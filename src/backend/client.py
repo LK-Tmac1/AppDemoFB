@@ -1,7 +1,7 @@
 import facebook, time
 from entity import Post, PageEntity, PostPublished
 from utility import real_time_to_unix
-from cache import CachedPost, CachedInsights
+from cache import CachedPost
 
 
 class PagePostClient(object):
@@ -10,11 +10,11 @@ class PagePostClient(object):
         self.api = facebook.GraphAPI()
         self.page = PageEntity(page_id="Unknown", page_name="Unknown")
         # here the cache is per post level, i.e. for each type of post, there is a cache
-        self.cacheP = CachedPost("published")
-        self.cacheU = CachedPost("unpublished")
-        self.cacheS = CachedPost("scheduled")
-        self.cachePostI = CachedInsights("post-insights", 60)
-        self.cachePageI = CachedInsights("page-insights", 3600)
+        self.cacheP = CachedPost("published", 300)
+        self.cacheU = CachedPost("unpublished", 300)
+        self.cacheS = CachedPost("scheduled", 300)
+        self.cachePostI = CachedPost("post-insights", 600)
+        self.cachePageI = CachedPost("page-insights", 3600)
 
     def cache_remove_one_batch(self, post_id):
         self.cacheS.remove_one(post_id)
@@ -28,11 +28,6 @@ class PagePostClient(object):
         self.cacheP.remove_all()
         self.cachePageI.remove_all()
         self.cachePostI.remove_all()
-
-    def cache_expire_batch(self):
-        self.cacheS.expire = True
-        self.cacheU.expire = True
-        self.cacheP.expire = True
 
     def get_cache(self, publish_status):
         # given a publish_status, return the corresponding data cached
@@ -51,7 +46,7 @@ class PagePostClient(object):
             response = self.api.get_object(id=base_url)
             post_list = Post.parse_post_from_json(response.get('data'), publish_status=publish_status)
             cache.remove_all()
-            cache.add_post_list(post_list)
+            cache.add_new_post_list(post_list)
             cache.expire = False
         return cache.get_all_data()
 
@@ -93,7 +88,7 @@ class PagePostClient(object):
                 updated_status = "published"
             post = self.get_target_post(post_id, publish_status=updated_status)
             cache_new = self.get_cache(updated_status)
-            cache_new.add_one(post_id, post)
+            cache_new.add_new_post(post)
             return True
         return response
 
@@ -113,7 +108,7 @@ class PagePostClient(object):
             response = self.api.get_object(id=base_url)
             post_list = Post.parse_post_from_json([response], publish_status)
             target_post = post_list[0] if post_list else None
-            cache.add_post_list(post_list)
+            cache.add_new_post_list(post_list)
         return target_post
 
     def delete_post(self, post_id):
@@ -136,7 +131,7 @@ class PagePostClient(object):
             post_list = self.list_post("published")
             for post in post_list:
                 self.get_post_insights(post)
-                self.cachePostI.add_new(post)
+                self.cachePostI.add_new_post(post)
             self.cachePostI.update_timer()
         return self.cachePostI.get_all_data()
 
