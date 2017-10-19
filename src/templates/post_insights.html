@@ -115,53 +115,47 @@
 
         </ul>
     </div>
-
-    <div class="row">
-                <div class="col-xs-12">
-                    <span class="page-title"><h4>{{ follow_message }}</h4></span>
-                </div>
-            </div>
             <div class="row">
 
                 <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11">
                     <div class="content-block">
                         <div class="block-content">
                             <form name="f1" method='post'>
-                                <button type="submit" name="view_insights" value="view_insights">View Posts Insights</button>
+                                <button type="submit" name="export_csv" value="export">Export As CSV</button>
                             </form>
                             <br>
                             <table id="example" class="table table-striped" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        {% block check_published_status_one %}
-                                            {% if published_status == 'published' %}
-                                                <th>Promotion</th>
-                                            {% elif published_status == 'scheduled' %}
-                                                <th>Scheduled time</th>
-                                            {% endif %}
-                                        {% endblock check_published_status_one %}
+                                        <th>Promotion</th>
+                                        <th>IFP</th>
+                                        <th>IF</th>
+                                        <th>ImpP</th>
+                                        <th>Imp</th>
+                                        <th>Con</th>
+                                        <th>EU</th>
+                                        <th>FR</th>
+                                        <th>EF</th>
+                                        <th>NF</th>
                                         <th>Message</th>
-                                        <th>Created time</th>
-                                        <th>Admin Creator</th>
                                         <th></th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                {% block check_published_status_two %}
                                 {% for post in post_list %}
                                     <tr>
-
-                                        {% if published_status == 'published' %}
-                                            <td>{{ post.promotion_status }}</td>
-                                        {% elif published_status == 'scheduled' %}
-                                            <td>{{ post.scheduled_time }}</td>
-                                        {% endif %}
-
+                                        <td>{{post.promotion_status}}</td>
+                                        <td>{{post.post_impressions_fan_paid}}</td>
+                                        <td>{{post.post_impressions_fan}}</td>
+                                        <td>{{post.post_impressions_paid}}</td>
+                                        <td>{{post.post_impressions}}</td>
+                                        <td>{{post.post_consumptions}}</td>
+                                        <td>{{post.post_engaged_users}}</td>
+                                        <td>{{post.post_fan_reach}}</td>
+                                        <td>{{post.post_engaged_fan}}</td>
+                                        <td>{{post.post_negative_feedback}}</td>
                                         <td>{{ post.message }}</td>
-                                        <td>{{ post.created_time }}</td>
-                                        <td>{{ post.admin_creator }}</td>
-
                                         <td>
                                             <form name="f1" method='post'>
                                                 <input type="hidden" name="published_status" value="{{published_status}}">
@@ -171,7 +165,6 @@
                                     </tr>
                                 {% endfor %}
                                 </tbody>
-                                {% endblock check_published_status_two %}
                             </table>
                         </div>
                     </div>

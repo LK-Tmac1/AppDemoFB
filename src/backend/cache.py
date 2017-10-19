@@ -33,12 +33,3 @@ class CachedPost(CachedData):
     def get_by_post_id(self, post_id):
         return self.cached_data.get(post_id)
 
-
-class CachedPostInsight(CachedData):
-    def __int__(self, name):
-        CachedData.__init__(self, name)
-        self.timestamp = None
-
-    def is_expired(self):
-        # if the flag is True, or there is no data cached, it expires so need to update by the client
-        return self.expire is True or len(self.cached_data) == 0

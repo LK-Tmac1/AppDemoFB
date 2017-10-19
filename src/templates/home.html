@@ -75,7 +75,6 @@
                     </a>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                    <a>
                         <div class="banner-block red">
                             <div class="block-content">
                                 <span class="banner-icon fa-stack fa-3x">
@@ -83,16 +82,62 @@
                                     <i class="fa fa-inbox fa-stack-1x fa-inverse"></i>
                                 </span>
                                 <div class="banner-content">
-                                    <div class="title"> {{ published_count + unpublished_count + scheduled_count }} </div>
+                                    <div class="title"> {{ published_count+unpublished_count+scheduled_count}} </div>
                                     <div class="sub-title">Total Posts</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+                        </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                        <div class="banner-block-v2 green">
+                            <div class="block-content">
+                                <div class="banner-content">
+                                    <div class="title">{{ page.page_impressions }}</div>
+                                    <div class="sub-title">Page Impressions</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+                        </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                        <div class="banner-block-v2 yellow">
+                            <div class="block-content">
+                                <div class="banner-content">
+                                    <div class="title">{{ page.page_engaged_users }}</div>
+                                    <div class="sub-title">Page Engaged Users</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+                        </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                        <div class="banner-block-v2 blue">
+                            <div class="block-content">
+                                <div class="banner-content">
+                                    <div class="title">{{ page.page_video_views }}</div>
+                                    <div class="sub-title">Page Video Views</div>
                                 </div>
                                 <div class="clear-both"></div>
                             </div>
 
                         </div>
-                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                        <div class="banner-block-v2 red">
+                            <div class="block-content">
+                                <div class="banner-content">
+                                    <div class="title">{{ page.page_views_total }}</div>
+                                    <div class="sub-title">Page Views Total</div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+
+                        </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <div class="banner-block white">
@@ -118,7 +163,6 @@
                                     <div id="dashboard-stat-chart-legend" class="pie-legend"></div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>

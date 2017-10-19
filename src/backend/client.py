@@ -1,13 +1,13 @@
 import facebook, time
-from entity import Post, PageEntity
+from entity import Post, PageEntity, PostPublished
 from utility import real_time_to_unix
-from cache import CachedPost, CachedPostInsight
+from cache import CachedPost
 
 
-class PageClient(object):
-    def __init__(self, access_token=None):
+class PagePostClient(object):
+    def __init__(self):
         # the client for a page
-        self.api = facebook.GraphAPI(access_token)
+        self.api = facebook.GraphAPI()
         self.page = PageEntity(page_id="Unknown", page_name="Unknown")
         # here the cache is per post level, i.e. for each type of post, there is a cache
         self.cacheP = CachedPost("published")
@@ -80,6 +80,7 @@ class PageClient(object):
         self.api = facebook.GraphAPI(access_token)
         json_data = self.api.get_object("me")
         self.page = PageEntity(page_id=json_data['id'], page_name=json_data['name'])
+        self.get_page_insights()
         self.cache_remove_all_batch()
 
     def get_target_post(self, post_id, publish_status):
@@ -100,18 +101,22 @@ class PageClient(object):
         self.cache_remove_one_batch(post_id)
         return True
 
-    def get_post_insights(self, post_id, fields):
+    def get_post_insights(self, post):
         # it must be a published post
         # insights data won't be cached as we might want to return the latest one
-        base_url = "%s/insights/%s" % (post_id, fields)
+        base_url = "%s/insights/%s" % (post.page_post_id, PostPublished.insights_fields)
         response = self.api.get_object(id=base_url)
-        return response.get('data', [])
+        post.parse_post_insight_from_json(response.get('data', []))
+        return
 
-    def get_post_impressions(self, post):
-        json_data = self.get_post_insights(post.page_post_id, "post_impressions")
-        if type(json_data) is list and json_data:
-            json_data = json_data[0]
-            if "values" in json_data and json_data['values']:
-                post.num_of_view = json_data['values'][0]['value']
-                return
-        post.num_of_view = 'N/A'
+    def get_post_insights_batch(self):
+        post_list = self.list_post("published")
+        for post in post_list:
+            self.get_post_insights(post)
+        return post_list
+
+    def get_page_insights(self):
+        base_url = "%s/insights/%s?period=week" % (self.page.page_id, PageEntity.insights_fields)
+        response = self.api.get_object(id=base_url)
+        self.page.parse_page_insights_from_json(response.get('data', []))
+        return

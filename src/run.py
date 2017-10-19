@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
-from backend.client import PageClient
+from backend.client import PagePostClient
 from backend.utility import get_min_schedule_date, unix_to_real_time
 import time, facebook
 
 app = Flask(__name__)
-page_client = PageClient()
+page_client = PagePostClient()
 
 
 def handle_error(error_message):
@@ -40,11 +40,13 @@ def home_dashboard():
         published_count = len(page_client.list_post("published"))
         unpublished_count = len(page_client.list_post("unpublished"))
         scheduled_count = len(page_client.list_post("scheduled"))
+        page_client.get_page_insights()
         return render_template("home.html",
                                published_count=published_count,
                                unpublished_count=unpublished_count,
                                scheduled_count=scheduled_count,
-                               page_name=page_client.page.page_name)
+                               page_name=page_client.page.page_name,
+                               page=page_client.page)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
@@ -66,9 +68,12 @@ def list_posts():
 @app.route('/list_posts', methods=['POST'])
 def view_post():
     try:
-        post_id = request.form.get("view")
-        published_status = request.args.get("published_status")
-        return redirect(url_for('view_post_details', post_id=post_id, published_status=published_status))
+        if "view" in request.form:
+            post_id = request.form.get("view")
+            published_status = request.args.get("published_status")
+            return redirect(url_for('view_post_details', post_id=post_id, published_status=published_status))
+        elif "view_insights" in request.form:
+            return redirect(url_for("get_post_insights"))
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 
@@ -147,6 +152,27 @@ def create_new_post():
             return handle_error(error_message=response)
     except facebook.GraphAPIError as e:
         return handle_error(error_message=e.message)
+
+
+@app.route('/post_insights', methods=["GET"])
+def get_post_insights():
+    try:
+        post_list = page_client.get_post_insights_batch()
+        return render_template("post_insights.html", post_list=post_list)
+    except facebook.GraphAPIError as e:
+        return handle_error(e.message)
+
+
+@app.route('/post_insights', methods=["POST"])
+def export_insights_csv():
+    try:
+        if "view" in request.form:
+            post_id = request.form.get("view")
+            return redirect(url_for("view_post_details", post_id=post_id, published_status="published"))
+        elif "export_csv" in request.form:
+            pass
+    except facebook.GraphAPIError as e:
+        return handle_error(e.message)
 
 
 if __name__ == '__main__':
