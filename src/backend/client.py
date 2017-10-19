@@ -1,7 +1,7 @@
 import facebook, time
 from entity import Post, PageEntity, PostPublished
 from utility import real_time_to_unix
-from cache import CachedPost
+from cache import CachedPost, CachedInsights
 
 
 class PagePostClient(object):
@@ -13,16 +13,21 @@ class PagePostClient(object):
         self.cacheP = CachedPost("published")
         self.cacheU = CachedPost("unpublished")
         self.cacheS = CachedPost("scheduled")
+        self.cachePostI = CachedInsights("post-insights", 60)
+        self.cachePageI = CachedInsights("page-insights", 3600)
 
     def cache_remove_one_batch(self, post_id):
         self.cacheS.remove_one(post_id)
         self.cacheU.remove_one(post_id)
         self.cacheP.remove_one(post_id)
+        self.cachePostI.remove_one(post_id)
 
     def cache_remove_all_batch(self):
         self.cacheS.remove_all()
         self.cacheU.remove_all()
         self.cacheP.remove_all()
+        self.cachePageI.remove_all()
+        self.cachePostI.remove_all()
 
     def cache_expire_batch(self):
         self.cacheS.expire = True
@@ -46,7 +51,7 @@ class PagePostClient(object):
             response = self.api.get_object(id=base_url)
             post_list = Post.parse_post_from_json(response.get('data'), publish_status=publish_status)
             cache.remove_all()
-            cache.add_new(post_list)
+            cache.add_post_list(post_list)
             cache.expire = False
         return cache.get_all_data()
 
@@ -68,13 +73,19 @@ class PagePostClient(object):
                 parameters.pop("published", None)
                 parameters.pop("scheduled_publish_time", None)
         response = self.api.put_object(parent_object, connection_name, **parameters)
-        if 'id' in response and 'error' not in response:
-            # if the creation/updating succeeds, set all caches as expired and return True to caller
+        if post_id and 'success' in response:
+            # if the updating succeeds, set all caches as expired
             self.cache_remove_all_batch()
             self.cache_expire_batch()
-            return True
-        # otherwise, return the response failure obtained from API call
-        return response
+        elif not post_id and 'id' in response and 'error' not in response:
+            # if not update, i.e. creating a new one, just expire the corresponding cache
+            cache = self.get_cache(published_status)
+            cache.remove_all()
+            cache.expire = True
+        else:
+            # otherwise, return the response failure obtained from API call
+            return response
+        return True
 
     def update_token(self, access_token):
         self.api = facebook.GraphAPI(access_token)
@@ -92,7 +103,7 @@ class PagePostClient(object):
             response = self.api.get_object(id=base_url)
             post_list = Post.parse_post_from_json([response], publish_status)
             target_post = post_list[0] if post_list else None
-            cache.add_new(post_list)
+            cache.add_post_list(post_list)
         return target_post
 
     def delete_post(self, post_id):
@@ -110,13 +121,19 @@ class PagePostClient(object):
         return
 
     def get_post_insights_batch(self):
-        post_list = self.list_post("published")
-        for post in post_list:
-            self.get_post_insights(post)
-        return post_list
+        if self.cachePostI.is_expired():
+            self.cachePostI.remove_all()
+            post_list = self.list_post("published")
+            for post in post_list:
+                self.get_post_insights(post)
+                self.cachePostI.add_new(post)
+            self.cachePostI.update_timer()
+        return self.cachePostI.get_all_data()
 
     def get_page_insights(self):
-        base_url = "%s/insights/%s?period=week" % (self.page.page_id, PageEntity.insights_fields)
-        response = self.api.get_object(id=base_url)
-        self.page.parse_page_insights_from_json(response.get('data', []))
+        if self.cachePageI.is_expired():
+            base_url = "%s/insights/%s?period=week" % (self.page.page_id, PageEntity.insights_fields)
+            response = self.api.get_object(id=base_url)
+            self.page.parse_page_insights_from_json(response.get('data', []))
+            self.cachePageI.update_timer()
         return

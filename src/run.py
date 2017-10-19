@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from backend.client import PagePostClient
 from backend.utility import get_min_schedule_date, unix_to_real_time
-import time, facebook
+from backend.entity import PostPublished
+import time, facebook, os
 
 app = Flask(__name__)
 page_client = PagePostClient()
@@ -113,7 +114,7 @@ def update_post():
                 if published_status == "scheduled" and "scheduled_time" in request.form:
                     parameters["scheduled_time"] = request.form.get("scheduled_time", 0)
             response = page_client.create_post(**parameters)
-            if 'success' in response:
+            if response is True:
                 follow_message = "Successfully updated the post."
                 return redirect(url_for('list_posts', published_status=published_status, follow_message=follow_message))
             else:
@@ -169,8 +170,13 @@ def export_insights_csv():
         if "view" in request.form:
             post_id = request.form.get("view")
             return redirect(url_for("view_post_details", post_id=post_id, published_status="published"))
-        elif "export_csv" in request.form:
-            pass
+        elif "export_excel" in request.form:
+            # convert post insights to csv objects
+            file_path = "%s/tmp/%s.xlsx" % (os.path.dirname(os.path.abspath(__file__)),
+                                            unix_to_real_time(int(time.time())))
+            post_list = page_client.list_post("published")
+            PostPublished.save_to_excel_file(file_path, post_list)
+            return send_file(file_path, as_attachment=True)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
 

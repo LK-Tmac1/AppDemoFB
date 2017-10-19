@@ -126,13 +126,23 @@
                 <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11">
                     <div class="content-block">
                         <div class="block-content">
+
+                            {% block check_published_status_csv %}
+                            {% if published_status == 'published' %}
                             <form name="f1" method='post'>
                                 <button type="submit" name="view_insights" value="view_insights">View Posts Insights</button>
                             </form>
                             <br>
+                            {% endif %}
+                            {% endblock check_published_status_csv %}
+
+
                             <table id="example" class="table table-striped" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
+                                        <th>Created time</th>
+                                        <th>Admin Creator</th>
+
                                         {% block check_published_status_one %}
                                             {% if published_status == 'published' %}
                                                 <th>Promotion</th>
@@ -141,8 +151,7 @@
                                             {% endif %}
                                         {% endblock check_published_status_one %}
                                         <th>Message</th>
-                                        <th>Created time</th>
-                                        <th>Admin Creator</th>
+
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -151,7 +160,8 @@
                                 {% block check_published_status_two %}
                                 {% for post in post_list %}
                                     <tr>
-
+                                        <td>{{ post.created_time }}</td>
+                                        <td>{{ post.admin_creator }}</td>
                                         {% if published_status == 'published' %}
                                             <td>{{ post.promotion_status }}</td>
                                         {% elif published_status == 'scheduled' %}
@@ -159,8 +169,6 @@
                                         {% endif %}
 
                                         <td>{{ post.message }}</td>
-                                        <td>{{ post.created_time }}</td>
-                                        <td>{{ post.admin_creator }}</td>
 
                                         <td>
                                             <form name="f1" method='post'>
@@ -183,7 +191,7 @@
     <script type="text/javascript">
     $(function() {
         $('#example').DataTable({
-             "order": [[ 1, "asc" ], [ 2, "desc" ]]
+             "order": [[ 0, "desc" ]]
         });
     });
     </script>

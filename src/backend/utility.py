@@ -1,6 +1,12 @@
 from datetime import datetime
 from dateutil import tz
-import time
+import time, os
+
+
+def prepare_parent_dir(file_path):
+    if not file_path or os.path.exists(file_path.strip()):
+        parent_dir = file_path[0:file_path.rfind(os.sep)]
+        os.makedirs(parent_dir)
 
 
 def get_min_schedule_date(min_offset=5):

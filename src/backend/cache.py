@@ -1,3 +1,6 @@
+import time
+
+
 class CachedData(object):
     def __init__(self, name):
         self.cached_data = dict([])
@@ -8,6 +11,18 @@ class CachedData(object):
         # if the flag is True, or there is no data cached, it expires so need to update by the client
         return self.expire is True or len(self.cached_data) == 0
 
+    def remove_all(self):
+        self.cached_data.clear()
+
+    def remove_one(self, key):
+        self.cached_data.pop(key, None)
+
+    def add_one(self, key, value):
+        self.cached_data[key] = value
+
+    def get_all_data(self):
+        return self.cached_data.values()
+
     def __repr__(self):
         return "%s: %s data, expired=%s" % (self.name, len(self.cached_data), self.expire)
 
@@ -17,19 +32,25 @@ class CachedPost(CachedData):
         # use dict to cache data to avoid calling API duplicated times
         CachedData.__init__(self, name)
 
-    def add_new(self, post_list):
+    def add_post_list(self, post_list):
         for post in post_list:
             self.cached_data[post.page_post_id] = post
-
-    def get_all_data(self):
-        return self.cached_data.values()
-
-    def remove_one(self, post_id):
-        self.cached_data.pop(post_id, None)
-
-    def remove_all(self):
-        self.cached_data.clear()
 
     def get_by_post_id(self, post_id):
         return self.cached_data.get(post_id)
 
+
+class CachedInsights(CachedData):
+    def __init__(self, name, threshold):
+        CachedData.__init__(self, name)
+        self.last_update_time = time.time()
+        self.threshold = threshold
+
+    def is_expired(self):
+        return time.time() - self.last_update_time >= self.threshold or len(self.cached_data) == 0
+
+    def update_timer(self):
+        self.last_update_time = time.time()
+
+    def add_new(self, post):
+        self.add_one(post.page_post_id, post)

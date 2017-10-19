@@ -1,5 +1,5 @@
-import random
-from utility import parse_str_date, unix_to_real_time
+import xlsxwriter
+from utility import parse_str_date, unix_to_real_time, prepare_parent_dir
 
 
 class PageEntity(object):
@@ -24,18 +24,7 @@ class PageEntity(object):
             if type(values) is list and len(values) >= 2:
                 # one unique one organic, get the average
                 value = ((values[0]['value'] + values[1]['value'])/2)
-            if name == "page_video_views_paid":
-                self.page_video_views_paid = value
-            elif name == "page_video_views":
-                self.page_video_views = value
-            elif name == "page_impressions":
-                self.page_impressions = value
-            elif name == "page_impressions_paid":
-                self.page_impressions_paid = value
-            elif name == "page_engaged_users":
-                self.page_engaged_users = value
-            elif name == "page_views_total":
-                self.page_views_total = value
+            setattr(self, name, value)
 
 
 class Post(object):
@@ -83,41 +72,44 @@ class PostPublished(Post):
     insights_fields = "post_impressions_fan_paid,post_impressions_fan," \
                       "post_impressions_paid,post_impressions,post_consumptions," \
                       "post_engaged_users,post_negative_feedback,post_fan_reach,post_engaged_fan"
+    insights_fields_list = insights_fields.split(",")
+    excel_header_list = ["promotion_status", "created_time", "message", "admin_creator"] + insights_fields_list
 
     def __init__(self, page_post_id, created_time, message, promotion_status, admin_creator):
         Post.__init__(self, page_post_id, created_time, message, admin_creator)
         self.promotion_status = promotion_status
-        self.post_impressions_fan_paid = self.post_impressions_fan = -1
-        self.post_impressions_paid = self.post_impressions = -1
-        self.post_consumptions = -1
-        self.post_engaged_users = -1
-        self.post_negative_feedback = -1
-        self.post_fan_reach = -1
-        self.post_engaged_fan = -1
 
     def parse_post_insight_from_json(self, json_data):
         for obj in json_data:
             name = obj['name']
             values = obj['values']
             value = values[0]['value'] if type(values) is list else ""
-            if name == "post_impressions_fan_paid":
-                self.post_impressions_fan_paid = value
-            elif name == "post_impressions_fan":
-                self.post_impressions_fan = value
-            elif name == "post_impressions_paid":
-                self.post_impressions_paid = value
-            elif name == "post_impressions":
-                self.post_impressions = value
-            elif name == "post_consumptions":
-                self.post_consumptions = value
-            elif name == "post_engaged_users":
-                self.post_engaged_users = value
-            elif name == "post_negative_feedback":
-                self.post_negative_feedback = value
-            elif name == "post_fan_reach":
-                self.post_fan_reach = value
-            elif name == "post_engaged_fan":
-                self.post_engaged_fan = value
+            setattr(self, name, value)
+
+    def to_excel_data(self):
+        data = []
+        for field in PostPublished.excel_header_list:
+            value = self.__getattribute__(field)
+            data.append(value)
+        return data
+
+    @staticmethod
+    def save_to_excel_file(excel_output_path, post_list):
+        prepare_parent_dir(excel_output_path)
+        wbk = xlsxwriter.Workbook(filename=excel_output_path)
+        sheet = wbk.add_worksheet('sheet1')
+        for i in xrange(len(PostPublished.excel_header_list)):
+            sheet.write(0, i, PostPublished.excel_header_list[i])
+        row = 1
+        for post in post_list:
+            if post:
+                col = 0
+                for d in post.to_excel_data():
+                    sheet.write(row, col, d)
+                    col += 1
+                row += 1
+        wbk.close()
+        return True
 
 
 class PostUnpublished(Post):
