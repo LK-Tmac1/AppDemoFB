@@ -5,6 +5,11 @@
             <div class="row">
                 <div class="col-xs-12">
                     <span class="page-title"><h4>{{ follow_message }}</h4></span>
+                    {% block check_scheduled_time %}
+                    {% if most_recent_scheduled_time != 0 %}
+                    <span class="page-title"><h4>The earliest scheduled published time is: <b>{{ most_recent_scheduled_time }}</b></h4></span>
+                    {% endif %}
+                    {% endblock check_scheduled_time %}
                 </div>
             </div>
             <div class="row">

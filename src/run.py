@@ -61,7 +61,11 @@ def list_posts():
         follow_message = request.args.get("follow_message")
         if not follow_message:
             follow_message = "%s posts for page %s" % (published_status.title(), page_client.page.page_name)
+        most_recent_scheduled_time = 0
+        if published_status == "scheduled":
+            most_recent_scheduled_time = page_client.get_earliest_scheduled_time()
         return render_template("list_posts.html", post_list=post_list,
+                               most_recent_scheduled_time=most_recent_scheduled_time,
                                follow_message=follow_message, published_status=published_status)
     except facebook.GraphAPIError as e:
         return handle_error(e.message)
@@ -104,6 +108,7 @@ def view_post_details():
 def update_post():
     try:
         current_status = request.form.get("current_status")
+        updated_status = request.form.get("updated_status")
         if 'edit' in request.form:
             # If the post is already published, cannot change it to unpublished or scheduled anymore.
             if "post_id" not in request.form:
@@ -115,7 +120,7 @@ def update_post():
                                                scheduled_time=request.form.get("scheduled_time"))
             if response is True:
                 follow_message = "Successfully updated the post."
-                return redirect(url_for('list_posts', published_status=current_status, follow_message=follow_message))
+                return redirect(url_for('list_posts', published_status=updated_status, follow_message=follow_message))
             else:
                 return handle_error(error_message=response)
         elif 'delete' in request.form:
@@ -141,6 +146,7 @@ def create_new_post():
     parameters = dict(message=request.form.get("message"))
     # default as unpublished
     parameters["published_status"] = published_status = request.form.get("published_status", "unpublished")
+    parameters["targeting"] = request.form.get("targeting_countries")
     if published_status == "scheduled" and "scheduled_time" in request.form:
         parameters["scheduled_time"] = request.form.get("scheduled_time")
     try:

@@ -31,6 +31,12 @@
                                     <option value='scheduled'>Schedule the publish</option>
                                 </select>
 
+                                <select name='targeting_countries' style="margin-right: 12px">
+                                    <option value='US'>USA</option>
+                                    <option value='UK'>UK</option>
+                                </select>
+
+
                                 <input type="datetime-local" name="scheduled_time" id="scheduled_time", min="{{ current_date_time }}" style="margin-right: 12px">
                                 <button type="submit" value='submit' class="btn">Create</button>
                             </div>

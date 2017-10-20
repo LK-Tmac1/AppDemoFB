@@ -50,10 +50,12 @@ class PagePostClient(object):
             cache.expire = False
         return cache.get_all_data()
 
-    def create_post(self, message, published_status, scheduled_time=None):
+    def create_post(self, message, published_status, scheduled_time=None, targeting=None):
         parameters = dict([])
         parameters["message"] = message
         parameters["published"] = published_status == "published"
+        if targeting is not None:
+            parameters["targeting"] = targeting
         if published_status == "scheduled" and scheduled_time is not None:
             scheduled_publish_time = real_time_to_unix(scheduled_time)
             if type(scheduled_publish_time) is int and scheduled_publish_time - int(time.time()) >= 60:
@@ -71,8 +73,8 @@ class PagePostClient(object):
 
     def update_post(self, post_id, message, current_status, updated_status, scheduled_time=None):
         parameters = {"message": message}
-        if current_status != "published":
-            parameters["published"] = True if updated_status == "published" else False
+        if current_status != "published" and updated_status == "published":
+            parameters["is_published"] = True
         if scheduled_time is not None and updated_status == "scheduled":
             scheduled_publish_time = real_time_to_unix(scheduled_time)
             if type(scheduled_publish_time) is int and scheduled_publish_time - int(time.time()) >= 60:
@@ -142,3 +144,11 @@ class PagePostClient(object):
             self.page.parse_page_insights_from_json(response.get('data', []))
             self.cachePageI.update_timer()
         return
+
+    def get_earliest_scheduled_time(self):
+        most_recent_scheduled_time = 0
+        scheduled_post_list = self.list_post("scheduled")
+        if scheduled_post_list:
+            scheduled_post_list.sort(key=lambda post: post.scheduled_time)
+            most_recent_scheduled_time = scheduled_post_list[0].scheduled_time
+        return most_recent_scheduled_time

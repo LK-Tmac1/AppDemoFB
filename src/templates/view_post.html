@@ -31,15 +31,17 @@
                                 {% block check_published %}
 
                                     {% if published_status != 'published' %}
-
-                                    <select name='updated_status' style="margin-right: 12px">
-                                        <option value='unpublished'>Don't publish it</option>
-                                        <option value='published'>Publish it right now</option>
-                                        <option value='scheduled'>Schedule the publish</option>
-                                    </select>
-
-                                    <input type="datetime-local" name="scheduled_time" id="scheduled_time", min="{{ current_date_time }}" style="margin-right: 12px">
-
+                                            <select name='updated_status' style="margin-right: 12px">
+                                        {% if published_status == 'unpublished' %}
+                                                <option value='unpublished'>Don't publish it</option>
+                                                <option value='published'>Publish it right now</option>
+                                                <option value='scheduled'>Schedule the publish</option>
+                                        {% elif published_status == 'scheduled' %}
+                                                <option value='published'>Publish it right now</option>
+                                                <option value='scheduled'>Schedule the publish</option>
+                                        {% endif %}
+                                            </select>
+                                            <input type="datetime-local" name="scheduled_time" id="scheduled_time", min="{{ current_date_time }}" style="margin-right: 12px">
                                     {% endif %}
 
                                 {% endblock check_published %}
